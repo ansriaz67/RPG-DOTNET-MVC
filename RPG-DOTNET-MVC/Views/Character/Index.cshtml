@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Character>
+
+@{
+    ViewData["Title"] = "Index";
+    int intSno = 0;
+    Pager pager = new Pager();
+    int pageNo = 0;
+    if(ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+        pageNo = pager.CurrentPage;
+    }
+}
+
+
+<div class="container p-3">
+    <div class="row pt-4">
+        <div class="col-6">
+            <h2 class="text-primary">Character List</h2>
+        </div>
+        @*<div class="col-6 text-end">
+            <a asp-controller="Character" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> &nbsp; Create New Character</a>
+        </div>*@
+    </div>
+</div>
+
+@*<div class="col-4 p-0 justify-content-end">
+    <form asp-controller="Character" asp-action="Index">
+        <span class="btn-group m-2">
+            <input class="form-control" type="text" name="SearchText" placeholder="Search Text" />
+            <input class="p-1 mx-1 btn btn-sm btn-info" type="submit" value="Submit" />
+        </span>
+    </form>
+</div>*@
+
+<table class="table table-bordered table-striped" style="width:100%;">
+    <thead>
+        <tr>
+            <th>S.No</th>
+            <th><a class="text-decoration-none" asp-controller="Character" asp-action="Index" asp-route-SortOrder="@ViewData["NameSort"]">Name</a></th>
+            <th>Hit Points</th>
+            <th>Strength</th>
+            <th>Defence</th>
+            <th>Intelligence</th>
+            <th>Class</th>
+            @*<th></th>*@
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var character in Model)
+        {
+            intSno += 1 ;
+            <tr>
+                <td style="width: 10%">@intSno</td>
+                <td style="width: 10%">@character.Name</td>
+                <td style="width: 30%">@character.HitPoits</td>
+                <td style="width: 30%">@character.Strength</td>
+                <td style="width: 30%">@character.Defence</td>
+                <td style="width: 30%">@character.Intelligence</td>
+                <td style="width: 30%">@character.Class</td>
+                @*<td>
+                    <div class="w-75 btn-group" role="group">
+                        <a class="btn btn-secondary mx-2" asp-controller="Character" asp-action="Edit" asp-route-id="@character.Id"><i class="bi bi-pencil-square"></i> Edit</a>
+                        <a class="btn btn-danger mx-2" asp-controller="Character" asp-action="Delete" asp-route-id="@character.Id"><i class="bi bi-trash3-fill"></i> Delete</a>
+                    </div>
+                </td>*@
+            </tr>
+        }
+    </tbody>
+</table>
+
+<partial name="_Pagination" model="@pager"/>
+
+
+
