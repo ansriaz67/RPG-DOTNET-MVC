@@ -15,7 +15,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddSession();
 builder.Services.AddSession(option =>
 {
-    option.IdleTimeout = TimeSpan.FromMinutes(1);
+    option.IdleTimeout = TimeSpan.FromMinutes(60 * 10);
     option.Cookie.HttpOnly = true;
     option.Cookie.IsEssential = true;
 });

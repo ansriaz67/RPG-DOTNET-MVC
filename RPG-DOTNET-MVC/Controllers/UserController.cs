@@ -5,9 +5,11 @@ using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RPG_DOTNET_MVC.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         /*private readonly ApplicationDbContext _db;
@@ -18,7 +20,7 @@ namespace RPG_DOTNET_MVC.Controllers
         }*/
         private readonly IHttpClientFactory _httpClientFactory;
         
-        public UserController(IHttpClientFactory httpClientFactory, UserManager<AppUser> usrMgr)
+        public UserController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }
@@ -67,19 +69,26 @@ namespace RPG_DOTNET_MVC.Controllers
 
 
         //GET
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || id == 0)
             {
                 return NotFound();
             }
-           /* var userFromDb = _db.RegisterModel.Find(id);
-            if (userFromDb == null)
-            {
-                return NotFound();
-            }*/
+            /* var userFromDb = _db.RegisterModel.Find(id);
+             if (userFromDb == null)
+             {
+                 return NotFound();
+             }*/
             /*return View(userFromDb);*/
-            return View();
+
+            var client = _httpClientFactory.CreateClient("myapi");
+            var token = HttpContext.Session.GetString("token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            HttpResponseMessage responseMessage = await client.GetAsync("");
+            var responseBody = await responseMessage.Content.ReadAsStringAsync();
+            var jsonDataDeserializeObject = JsonConvert.DeserializeObject<ServiceResponseCharacter>(responseBody);
+            return View(jsonDataDeserializeObject.Data);
         }
 
         //POST

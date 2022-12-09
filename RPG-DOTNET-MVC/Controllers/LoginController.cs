@@ -26,7 +26,9 @@ namespace RPG_DOTNET_MVC.Controllers
         public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated)
+            {
                 return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         [HttpPost]

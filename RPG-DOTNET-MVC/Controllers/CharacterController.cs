@@ -6,10 +6,12 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace RPG_DOTNET_MVC.Controllers
 {
-    /*[Authorize]*/
+    [Authorize]
     public class CharacterController : Controller
     {
         /*private readonly ApplicationDbContext _db;*/
@@ -21,7 +23,7 @@ namespace RPG_DOTNET_MVC.Controllers
 
         public async Task<IActionResult> Index(int pg = 1, string SearchText = "", string SortOrder = "")
         {
-            const int pageSize = 5;
+            const int pageSize = 3;
             var client = _httpClientFactory.CreateClient("myapi");
             var token = HttpContext.Session.GetString("token");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -33,43 +35,68 @@ namespace RPG_DOTNET_MVC.Controllers
             var jsonDataDeserializeObject = JsonConvert.DeserializeObject<ServiceResponseCharacter>(responseBody);
             if (responseMessage.IsSuccessStatusCode)
             {
+          
+
+                ViewData["NameSort"] = String.IsNullOrEmpty(SortOrder) ? "name_desc" : "";
+                /*var objcategoriesList = from c in _db.Categories
+                           select c;*/
+                switch (SortOrder)
+                {
+                    case "name_desc":
+                        responseMessage = await client.GetAsync("character/sortdesc/" + "name_desc");
+                        responseBody = await responseMessage.Content.ReadAsStringAsync();
+                        jsonDataDeserializeObject = JsonConvert.DeserializeObject<ServiceResponseCharacter>(responseBody);
+                        break;
+                    default:
+                        responseMessage = await client.GetAsync("character/sortdesc/" + "name");
+                        responseBody = await responseMessage.Content.ReadAsStringAsync();
+                        jsonDataDeserializeObject = JsonConvert.DeserializeObject<ServiceResponseCharacter>(responseBody);
+                        break;
+                }
+
                 if (SearchText != null && SearchText != "")
                 {
                     responseMessage = await client.GetAsync("character/search/" + SearchText);
                     responseBody = await responseMessage.Content.ReadAsStringAsync();
                     jsonDataDeserializeObject = JsonConvert.DeserializeObject<ServiceResponseCharacter>(responseBody);
+                    /*return View(jsonDataDeserializeObject.Data);*/
                     /*objcategoriesList = objcategoriesList.Where(s => s.Name.Contains(SearchText));*/
                 }
-                return View(jsonDataDeserializeObject.Data);
-                /*ViewData["NameSort"] = String.IsNullOrEmpty(SortOrder) ? "name_desc" : "";
-                var objcategoriesList = from c in _db.Categories
-                           select c;
-                switch (SortOrder)
-                {
-                    case "name_desc":
-                        objcategoriesList = objcategoriesList.OrderByDescending(a => a.Name);
-                        break;
-                    default:
-                        objcategoriesList = objcategoriesList.OrderBy(a => a.Name);
-                        break;
-                }
 
-               
-
-                
                 if (pg < 1)
                 {
                     pg = 1;
-                }*/
+                }
+                int recsCount = jsonDataDeserializeObject.Data.Count();
+                var pager = new Pager(recsCount, pg, pageSize);
+                int recSkip = (pg - 1) * pageSize;
+                var data = jsonDataDeserializeObject.Data.Skip(recSkip).Take(pager.PageSize).ToList();
+                this.ViewBag.Pager = pager;
+
+               
+
+               return View(data);
+
+
+                /* if (pg < 1)
+                 {
+                     pg = 1;
+                 }*/
                 /*int recsCount = jsonDataDeserializeObject.Data.Count();
                 var pager = new Pager(recsCount, pg, pageSize);
                 int recSkip = (pg - 1) * pageSize;
                 var data = jsonDataDeserializeObject.Data.Skip(recSkip).Take(pager.PageSize).ToList();
                 this.ViewBag.Pager = pager;
                 return View(data);*/
-                
+
             }
-                return View();
+            /*if (responseMessage.)
+            {
+                TempData["error"] = "Session Expire!";
+                HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Index", "Login");
+            }*/
+            return View();
         }
 
         //GET
@@ -98,7 +125,7 @@ namespace RPG_DOTNET_MVC.Controllers
         }*/
 
         //GET
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if(id == null || id == 0)
             {
@@ -144,7 +171,9 @@ namespace RPG_DOTNET_MVC.Controllers
                 return NotFound();
             }*/
            /* return View(categoryFromDb);*/
-            return View();
+
+                
+                          return View();
         }
 
         //POST
